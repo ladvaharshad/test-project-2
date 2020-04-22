@@ -6,109 +6,74 @@
  * @flow strict-local
  */
 
-import React from 'react';
-import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
-  View,
-  Text,
-  StatusBar,
-} from 'react-native';
+import React, { Component } from 'react';
+import { Container, List, ListItem, Header, Text, Content,Body, Title, Form, Item, Input, Label, Button } from 'native-base';
+import { StyleSheet } from 'react-native';
+export default class App extends Component {
+  
+  constructor(props) {
+    super(props);
+    this.state = {
+      countyName: '',
+      data: []
+    }
+  }
 
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+  getData = () => { 
+     fetch('https://restcountries.eu/rest/v2/name/'+this.state.countyName, { method: 'GET' })
+     .then(res => res.json())
+     .then((responseJson) => {
+       console.log(responseJson);
+       this.setState({ data: responseJson });
+       return responseJson;
+     }) 
+     .catch(error => {
+      console.log(error);
+     });
+  }
 
-const App: () => React$Node = () => {
-  return (
-    <>
-      <StatusBar barStyle="dark-content" />
-      <SafeAreaView>
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          style={styles.scrollView}>
-          <Header />
-          {global.HermesInternal == null ? null : (
-            <View style={styles.engine}>
-              <Text style={styles.footer}>Engine: Hermes</Text>
-            </View>
-          )}
-          <View style={styles.body}>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Step One</Text>
-              <Text style={styles.sectionDescription}>
-                Edit <Text style={styles.highlight}>App.js</Text> to change this
-                screen and then come back to see your edits.
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>See Your Changes</Text>
-              <Text style={styles.sectionDescription}>
-                <ReloadInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Debug</Text>
-              <Text style={styles.sectionDescription}>
-                <DebugInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Learn More</Text>
-              <Text style={styles.sectionDescription}>
-                Read the docs to discover what to do next:
-              </Text>
-            </View>
-            <LearnMoreLinks />
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    </>
-  );
-};
+  getDetail = (item) => {
+    console.log('item>>', item);
+    // navigation.navigate('Details');
+  } 
+
+  render() {
+    return (
+      <Container>
+        <Header>
+          <Body>
+            <Title>Add Country</Title>
+          </Body>
+        </Header>
+        <Content>
+            <Item>
+              <Input value={this.state.countyName} onChangeText={(value)=>this.setState({countyName:value})} style={styles.input} placeholder="Enter country"/>
+            </Item>
+            <List>
+              {
+                this.state.data.map((item, index) => {
+                  return <ListItem onPress={() => this.getDetail(item)}><Text>
+                    { item.name }
+                  </Text></ListItem>  
+                })
+              }
+            </List>
+            <Button onPress={this.getData} disabled={ !this.state.countyName } style={styles.submitButton} rounded full>
+              <Text>Submit</Text>
+            </Button> 
+        </Content>
+      </Container>
+    );
+  }
+}
 
 const styles = StyleSheet.create({
-  scrollView: {
-    backgroundColor: Colors.lighter,
+  submitButton: {
+    padding: 12,
+    margin: 12
   },
-  engine: {
-    position: 'absolute',
-    right: 0,
-  },
-  body: {
-    backgroundColor: Colors.white,
-  },
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: Colors.black,
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-    color: Colors.dark,
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-  footer: {
-    color: Colors.dark,
-    fontSize: 12,
-    fontWeight: '600',
-    padding: 4,
-    paddingRight: 12,
-    textAlign: 'right',
-  },
+  input: {
+    margin: 12,
+    padding: 12
+  }
 });
-
-export default App;
